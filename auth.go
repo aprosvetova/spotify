@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"net/http"
 	"os"
@@ -104,15 +103,24 @@ func NewAuthenticator(redirectURL string, scopes ...string) Authenticator {
 		},
 	}
 
-	// disable HTTP/2 for DefaultClient, see: https://github.com/zmb3/spotify/issues/20
-	tr := &http.Transport{
-		TLSNextProto: map[string]func(authority string, c *tls.Conn) http.RoundTripper{},
-	}
-	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: tr})
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: &addUGA{
+		inner: http.DefaultTransport,
+		Agent: "Spotify",
+	}})
 	return Authenticator{
 		config:  cfg,
 		context: ctx,
 	}
+}
+
+type addUGA struct {
+	inner http.RoundTripper
+	Agent string
+}
+
+func (ug *addUGA) RoundTrip(r *http.Request) (*http.Response, error) {
+	r.Header.Set("User-Agent", ug.Agent)
+	return ug.inner.RoundTrip(r)
 }
 
 // SetAuthInfo overwrites the client ID and secret key used by the authenticator.
