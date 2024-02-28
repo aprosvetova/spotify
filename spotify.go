@@ -82,14 +82,48 @@ type Followers struct {
 	Endpoint string `json:"href"`
 }
 
+func (f *Followers) UnmarshalJSON(data []byte) error {
+	var v struct {
+		Count    float64 `json:"total"`
+		Endpoint string  `json:"href"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	f.Count = uint(v.Count)
+	f.Endpoint = v.Endpoint
+
+	return nil
+}
+
 // Image identifies an image associated with an item.
 type Image struct {
 	// The image height, in pixels.
-	Height float64 `json:"height"`
+	Height int `json:"height"`
 	// The image width, in pixels.
-	Width float64 `json:"width"`
+	Width int `json:"width"`
 	// The source URL of the image.
 	URL string `json:"url"`
+}
+
+func (i *Image) UnmarshalJSON(data []byte) error {
+	var v struct {
+		Height float64 `json:"height"`
+		Width  float64 `json:"width"`
+		URL    string  `json:"url"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	i.Height = int(v.Height)
+	i.Width = int(v.Width)
+	i.URL = v.URL
+
+	return nil
 }
 
 // Download downloads the image and writes its data to the specified io.Writer.
