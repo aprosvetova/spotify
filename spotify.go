@@ -85,9 +85,9 @@ type Followers struct {
 // Image identifies an image associated with an item.
 type Image struct {
 	// The image height, in pixels.
-	Height int `json:"height"`
+	Height float64 `json:"height"`
 	// The image width, in pixels.
-	Width int `json:"width"`
+	Width float64 `json:"width"`
 	// The source URL of the image.
 	URL string `json:"url"`
 }
