@@ -39,6 +39,44 @@ type SimpleTrack struct {
 	Type string `json:"type"`
 }
 
+func (f *SimpleTrack) UnmarshalJSON(data []byte) error {
+	var v struct {
+		Artists          []SimpleArtist    `json:"artists"`
+		AvailableMarkets []string          `json:"available_markets"`
+		DiscNumber       float64           `json:"disc_number"`
+		Duration         float64           `json:"duration_ms"`
+		Explicit         bool              `json:"explicit"`
+		ExternalURLs     map[string]string `json:"external_urls"`
+		Endpoint         string            `json:"href"`
+		ID               ID                `json:"id"`
+		Name             string            `json:"name"`
+		PreviewURL       string            `json:"preview_url"`
+		TrackNumber      float64           `json:"track_number"`
+		URI              URI               `json:"uri"`
+		Type             string            `json:"type"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	f.Artists = v.Artists
+	f.AvailableMarkets = v.AvailableMarkets
+	f.DiscNumber = int(v.DiscNumber)
+	f.Duration = int(v.Duration)
+	f.Explicit = v.Explicit
+	f.ExternalURLs = v.ExternalURLs
+	f.Endpoint = v.Endpoint
+	f.ID = v.ID
+	f.Name = v.Name
+	f.PreviewURL = v.PreviewURL
+	f.TrackNumber = int(v.TrackNumber)
+	f.URI = v.URI
+	f.Type = v.Type
+
+	return nil
+}
+
 func (st SimpleTrack) String() string {
 	return fmt.Sprintf("TRACK<[%s] [%s]>", st.ID, st.Name)
 }
@@ -89,7 +127,7 @@ func (f *FullTrack) UnmarshalJSON(data []byte) error {
 		SimpleTrack
 		Album       SimpleAlbum       `json:"album"`
 		ExternalIDs map[string]string `json:"external_ids"`
-		Popularity  int               `json:"popularity"`
+		Popularity  float64           `json:"popularity"`
 		IsPlayable  *bool             `json:"is_playable"`
 		LinkedFrom  *LinkedFromInfo   `json:"linked_from"`
 	}
