@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -81,6 +82,30 @@ type FullTrack struct {
 	// LinkedFrom points to the linked track. It's reported when the "market" parameter is passed to the tracks listing
 	// API.
 	LinkedFrom *LinkedFromInfo `json:"linked_from"`
+}
+
+func (f *FullTrack) UnmarshalJSON(data []byte) error {
+	var v struct {
+		SimpleTrack
+		Album       SimpleAlbum       `json:"album"`
+		ExternalIDs map[string]string `json:"external_ids"`
+		Popularity  int               `json:"popularity"`
+		IsPlayable  *bool             `json:"is_playable"`
+		LinkedFrom  *LinkedFromInfo   `json:"linked_from"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	f.SimpleTrack = v.SimpleTrack
+	f.Album = v.Album
+	f.ExternalIDs = v.ExternalIDs
+	f.Popularity = int(v.Popularity)
+	f.IsPlayable = v.IsPlayable
+	f.LinkedFrom = v.LinkedFrom
+
+	return nil
 }
 
 // PlaylistTrack contains info about a track in a playlist.
